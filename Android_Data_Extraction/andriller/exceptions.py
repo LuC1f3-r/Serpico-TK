@@ -1,2 +1,0 @@
-class FileHandlerError(Exception):
-    pass
