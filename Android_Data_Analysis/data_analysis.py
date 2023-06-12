@@ -3,6 +3,7 @@ import datetime
 import re
 import binascii
 import magic
+import pandas as pd
 
 # Function to perform timeline analysis and plot results in a graph
 
@@ -39,17 +40,9 @@ def plot_timeline(timestamps):
 def keyword_search(extracted_data_path):
     print("Performing keyword search...")
     search_term = input("Enter a keyword to search for: ")
-    file_list = os.listdir(extracted_data_path)
-    for file_name in file_list:
-        file_path = os.path.join(extracted_data_path, file_name)
-        if os.path.isfile(file_path):
-            with open(file_path, "r", encoding='utf8', errors='ignore') as file:
-                line_num = 0
-                for line in file:
-                    line_num += 1
-                    if re.search(search_term, line, re.IGNORECASE):
-                        print(
-                            f"{search_term} found in {file_name} at line {line_num}")
+    print(extracted_data_path)
+    if os.path.isfile(extracted_data_path):
+            csvFile = pd.DataFrame()
     print("Keyword search complete.\n")
 
 

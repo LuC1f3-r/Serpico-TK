@@ -98,7 +98,8 @@ class ChainExecution:
                     return src.groups()[0]
 
         def get_accounts(dump):
-            accs = re.findall(r'Account \{name=(.+?), type=(.+?)\}', dump, re.S)
+            accs = re.findall(
+                r'Account \{name=(.+?), type=(.+?)\}', dump, re.S)
             return [(v, k) for k, v in accs]
 
         # Serial, status, permissions
@@ -107,7 +108,8 @@ class ChainExecution:
 
         # Build Props
         with suppress(TimeoutError):
-            build_prop = self.adb.adb_out('cat /system/build.prop', su=self.su, timeout=5)
+            build_prop = self.adb.adb_out(
+                'cat /system/build.prop', su=self.su, timeout=5)
             if build_prop:
                 build_prop = build_prop.split('\n')
                 props = [
@@ -128,7 +130,8 @@ class ChainExecution:
         with suppress(TimeoutError):
             _usbinfo = self.adb.adb_out('dumpsys iphonesubinfo', timeout=5)
             if _usbinfo:
-                self.REPORT['imei'] = get_prop(_usbinfo.split('\n'), 'Device ID')
+                self.REPORT['imei'] = get_prop(
+                    _usbinfo.split('\n'), 'Device ID')
 
         # IMEI for Android v6+
         # with suppress(TimeoutError):
@@ -147,7 +150,8 @@ class ChainExecution:
         # SIM Card
         with suppress(TimeoutError, Exception):
             if self.adb.exists('/data/system/SimCard.dat', su=self.su):
-                _simdat = self.adb.adb_out('cat /data/system/SimCard.dat', su=self.su, timeout=5)
+                _simdat = self.adb.adb_out(
+                    'cat /data/system/SimCard.dat', su=self.su, timeout=5)
                 sims = [
                     'CurrentSimSerialNumber',
                     'CurrentSimPhoneNumber',
@@ -181,8 +185,10 @@ class ChainExecution:
                         self.REPORT.get('ro.product.model', self.REPORT['permisson'])),
                     date_, time_,))
         except Exception:
-            self.work_dir = os.path.join(self.base_dir, f'andriller_extraction_{date_}_{time_}')
-        self.output_dir = os.path.join(self.base_dir, self.work_dir, self.extract_dir)
+            self.work_dir = os.path.join(
+                self.base_dir, f'andriller_extraction_{date_}_{time_}')
+        self.output_dir = os.path.join(
+            self.base_dir, self.work_dir, self.extract_dir)
         self.logger.debug(f'work_dir:{self.work_dir}')
         self.logger.debug(f'output_dir:{self.output_dir}')
         self.setup()
@@ -223,7 +229,8 @@ class ChainExecution:
                             self.DOWNLOADS.append(file_name)
                             return True
                         time.sleep(0.25)
-                        self.logger.debug(f'Trying again for {file_name} ({len(file_obj)} bytes)')
+                        self.logger.debug(
+                            f'Trying again for {file_name} ({len(file_obj)} bytes)')
                 else:
                     self.logger.warning(f'Failed getting file: {file_name}')
         return False
@@ -245,7 +252,8 @@ class ChainExecution:
             time.sleep(0.5)
             if os.path.exists(backup_file):
                 _size = os.path.getsize(backup_file)
-                self.update(f'Reading backup: {utils.human_bytes(_size)}', info=False)
+                self.update(
+                    f'Reading backup: {utils.human_bytes(_size)}', info=False)
         self.backup = backup_file
 
     def AndroidBackupToTar(self):
@@ -262,7 +270,8 @@ class ChainExecution:
             self.DOWNLOADS.append(fn)
 
     def get_targets(self):
-        self.targets = [*map(pathlib.PurePath, self.registry.get_posix_links())]
+        self.targets = [
+            *map(pathlib.PurePath, self.registry.get_posix_links())]
 
     def in_targets(self, target):
         if not self.targets:
@@ -325,8 +334,10 @@ class ChainExecution:
         try:
             if self.backup or (self.do_shared and self.backup):
                 self.update('Decoding shared filesystem...')
-                deco = decoders.SharedFilesystemDecoder(self.work_dir, self.backup)
-                self.DECODED.append([deco.report_html(), f'{deco.title} ({len(deco.DATA)})'])
+                deco = decoders.SharedFilesystemDecoder(
+                    self.work_dir, self.backup)
+                self.DECODED.append(
+                    [deco.report_html(), f'{deco.title} ({len(deco.DATA)})'])
         except Exception as err:
             logger.exception(f'Shared decoder error: {err}')
 
@@ -339,14 +350,17 @@ class ChainExecution:
                 for deco_class in self.registry.decoders_target(file_name):
                     file_path = os.path.join(self.output_dir, file_name)
                     try:
-                        self.logger.info(f'Decoding {file_name} using {deco_class.__name__}')
+                        self.logger.info(
+                            f'Decoding {file_name} using {deco_class.__name__}')
                         deco = deco_class(self.work_dir, file_path)
                         if not deco.template_name:
                             continue
-                        self.DECODED.append([deco.report_html(), f'{deco.title} ({len(deco.DATA)})'])
+                        self.DECODED.append(
+                            [deco.report_html(), f'{deco.title} ({len(deco.DATA)})'])
                         deco.report_xlsx(workbook=workbook)
                     except Exception as e:
-                        logger.error(f'Decoding error for `{os.path.basename(file_name)}`: {e}')
+                        logger.error(
+                            f'Decoding error for `{os.path.basename(file_name)}`: {e}')
                         logger.exception(str(e))
 
     def GenerateHtmlReport(self, open_html=True):
